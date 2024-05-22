@@ -246,10 +246,8 @@ jobs:
     name: All required checks done
     needs:
       - go-lint
-      - python-lint
       - go-unit-tests
       - go-integration-tests
-      - python-integration-tests
       - build
     runs-on: ubuntu-latest
     steps:
