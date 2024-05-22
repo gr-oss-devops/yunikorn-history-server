@@ -84,25 +84,6 @@ jobs:
       - name: Run golangci-lint
         run: make go-lint
 
-  python-lint:
-    if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
-    name: Python Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install pipenv
-        run: pip install pipenv==2022.12.19
-
-      - name: Run Python linters
-        run: make python-lint
-
   go-unit-tests:
     if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
     name: Go Unit Tests
@@ -161,45 +142,6 @@ jobs:
       - name: Save cache
         if: steps.cache.outputs.cache-hit != 'true'
         run: docker run --rm -v fml-integration-tests_go-cache:/cache -v /tmp/go-cache:/dst alpine tar cf /dst/go-build.tar -C /cache go-build
-
-  python-integration-tests:
-    if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
-    name: Python Integration Tests (${{ matrix.api }})
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        test-targets: [aim, mlflow, fml_client]
-      fail-fast: false
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        id: setup-go
-        uses: ./.github/actions/setup-go
-        with:
-          cache-prefix: python-integration-tests
-
-      - name: Compute cache info
-        id: cache-info
-        run: |
-          echo go-version=$(skopeo inspect docker://golang:${{ steps.setup-go.outputs.go-version }} | jq -r .Digest | cut -d: -f2) >> $GITHUB_OUTPUT
-
-      - name: Setup cache
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: /tmp/go-cache
-          key: python-integration-tests-image-${{ steps.cache-info.outputs.go-version }}-mod-${{ hashFiles('.go-build-tags', 'go.sum') }}
-
-      - name: Run Python integration tests
-        run: |
-          if [ "${{ steps.cache.outputs.cache-hit }}" == "true" ]; then
-            cache=-cache-from=/tmp/go-cache
-          else
-            cache=-cache-to=/tmp/go-cache
-          fi
-          go run tests/integration/python/main.go $cache -targets ${{ matrix.test-targets }}
 
   build:
     if: github.event_name == 'schedule' || github.event_name == 'push' || github.event.pull_request.head.repo.id != github.event.pull_request.base.repo.id
