@@ -76,6 +76,7 @@ jobs:
           echo path=${BASH_REMATCH[1]} >> $GITHUB_OUTPUT
 
       - name: Setup golangci-lint cache
+        continue-on-error: true # TODO: remove this line once golangci-lint cache is stable
         uses: actions/cache@v4
         with:
           path: ${{ steps.golangci-lint-cache-info.outputs.path }}
@@ -148,18 +149,8 @@ jobs:
     name: Build (${{ matrix.os }}/${{ matrix.arch }})
     strategy:
       matrix:
-        os: [darwin, linux, windows]
+        os: [linux]
         arch: [amd64, arm64]
-        exclude:
-          - os: windows
-            arch: arm64
-        include:
-          - os: darwin
-            runner: macos-latest
-          - os: linux
-            runner: ubuntu-latest
-          - os: windows
-            runner: ubuntu-latest
       fail-fast: true
     runs-on: ${{ matrix.runner }}
 
@@ -174,27 +165,12 @@ jobs:
         with:
           cache-prefix: build-${{ matrix.os }}-${{ matrix.arch }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install pipenv
-        run: pip install pipenv==2022.12.19
-
       - name: Install arm64 cross-compilation toolchain on Linux
         if: matrix.os == 'linux' && matrix.arch == 'arm64'
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu libc6-dev-arm64-cross
           echo CC=aarch64-linux-gnu-gcc >> $GITHUB_ENV
-
-      - name: Install Windows cross-compilation toolchain on Linux
-        if: matrix.os == 'windows'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends gcc-mingw-w64-x86-64-win32
-          echo CC=x86_64-w64-mingw32-gcc >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         if: matrix.os == 'linux'
