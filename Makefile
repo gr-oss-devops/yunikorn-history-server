@@ -74,7 +74,7 @@ install-tools: ## install tools.
 # Linter targets.
 #
 .PHONY: lint
-lint: go-lint python-lint ## run set of linters over the code.
+lint: go-lint ## run set of linters over the code.
 
 #
 # Go targets.
@@ -108,35 +108,10 @@ go-dist: go-build ## archive app binary.
 	@$(ARCHIVE_CMD) $(ARCHIVE_NAME) $(ARCHIVE_FILES)
 
 #
-# Python targets.
-#
-.PHONY: python-env
-python-env: ## create python virtual environment.
-	@echo '>>> Creating python virtual environment.'
-	@pipenv sync
-
-.PHONY: python-dist
-python-dist: go-build python-env ## build python wheels.
-	@echo '>>> Building Python Wheels.'
-	@VERSION=$(VERSION) pipenv run python3 -m pip wheel ./python --wheel-dir=wheelhouse --no-deps
-
-.PHONY: python-format
-python-format: python-env ## format python code.
-	@echo '>>> Formatting python code.'
-	@pipenv run black --line-length 120 .
-	@pipenv run isort --profile black .
-
-.PHONY: python-lint
-python-lint: python-env ## check python code formatting.
-	@echo '>>> Checking python code formatting.'
-	@pipenv run black --check --line-length 120 .
-	@pipenv run isort --check-only --profile black .
-
-#
 # Tests targets.
 #
 .PHONY: test
-test: test-go-unit container-test test-python-integration ## run all the tests.
+test: test-go-unit container-test ## run all the tests.
 
 .PHONY: test-go-unit
 test-go-unit: ## run go unit tests.
@@ -147,21 +122,6 @@ test-go-unit: ## run go unit tests.
 test-go-integration: ## run go integration tests.
 	@echo ">>> Running integration tests."
 	@go test -tags="$(GO_BUILDTAGS)" ./tests/integration/golang/...
-
-.PHONY: test-python-integration
-test-python-integration: ## run all the python integration tests.
-	@echo ">>> Running all python integration tests."
-	@go run tests/integration/python/main.go
-
-.PHONY: test-python-integration-mlflow
-test-python-integration-mlflow: ## run the MLFlow python integration tests.
-	@echo ">>> Running MLFlow python integration tests."
-	@go run tests/integration/python/main.go -targets mlflow
-
-.PHONY: test-python-integration-aim
-test-python-integration-aim: ## run the Aim python integration tests.
-	@echo ">>> Running Aim python integration tests."
-	@go run tests/integration/python/main.go -targets aim
 
 #
 # Container test targets.
@@ -236,13 +196,13 @@ clean: ## clean build artifacts.
 build: go-build ## build the app.
 
 .PHONY: dist
-dist: go-dist python-dist ## build the software archives.
+dist: go-dist ## build the software archives.
 ifeq ($(shell go env GOOS),linux)
 dist: docker-dist
 endif
 
 .PHONY: format
-format: go-format python-format ## format the code.
+format: go-format ## format the code.
 
 .PHONY: run
 run: build ## run the FastTrackML server.
