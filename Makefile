@@ -81,3 +81,4 @@ install-tools: ## install tools.
 	@echo '>>> Installing tools.'
 	@go install mvdan.cc/gofumpt@v0.5.0
 	@go install golang.org/x/tools/cmd/goimports@v0.13.0
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
