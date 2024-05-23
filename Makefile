@@ -80,3 +80,4 @@ go-format: ## format go code.
 install-tools: ## install tools.
 	@echo '>>> Installing tools.'
 	@go install mvdan.cc/gofumpt@v0.5.0
+@go install golang.org/x/tools/cmd/goimports@v0.13.0
