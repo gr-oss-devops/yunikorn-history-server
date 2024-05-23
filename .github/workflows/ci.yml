@@ -22,6 +22,26 @@ jobs:
         with:
           cache-prefix: go-lint
 
+      - name: Compute tools cache info
+        id: tools-cache-info
+        run: |
+          echo path=$(go env GOPATH)/bin >> $GITHUB_OUTPUT
+          echo make-hash=$(make -n install-tools | sha256sum | cut -d' ' -f1) >> $GITHUB_OUTPUT
+
+      - name: Setup tools cache
+        uses: actions/cache@v4
+        id: tools-cache
+        with:
+          path: ${{ steps.tools-cache-info.outputs.path }}
+          key: tools-go-${{ steps.setup-go.outputs.go-version }}-make-${{ steps.tools-cache-info.outputs.make-hash }}
+
+      - name: Install tools
+        if: steps.tools-cache.outputs.cache-hit != 'true'
+        env:
+          GOCACHE: /tmp/tools/go-build
+          GOMODCACHE: /tmp/tools/go-mod
+        run: make install-tools
+
       - name: Check formatting
         run: |
           make go-format

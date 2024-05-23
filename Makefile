@@ -75,3 +75,8 @@ go-format: ## format go code.
 	@echo '>>> Formatting go code.'
 	@gofumpt -w .
 	@goimports -w -local github.com/gr-oss-devops/yunikorn-history-server $(shell find . -type f -name '*.go') ## TODO: update the local path in a PR
+
+.PHONY: install-tools
+install-tools: ## install tools.
+	@echo '>>> Installing tools.'
+	@go install mvdan.cc/gofumpt@v0.5.0
