@@ -60,14 +60,11 @@ jobs:
         id: golangci-lint-cache-info
         run: |
           version_regex=" v([0-9]+\.[0-9]+\.[0-9]+) "
-          if [[ "$(golangci-lint version)" =~ $version_regex ]]
-            echo version=${BASH_REMATCH[1]} >> $GITHUB_OUTPUT
-            cache_regex="Dir: (.*)
-            "
-          fi
-          if [[ "$(golangci-lint cache status)" =~ $cache_regex ]]
-            echo path=${BASH_REMATCH[1]} >> $GITHUB_OUTPUT
-          fi
+          [[ "$(golangci-lint version)" =~ $version_regex ]]
+          echo version=${BASH_REMATCH[1]} >> $GITHUB_OUTPUT
+          cache_regex="Dir: (.*)"
+          [[ "$(golangci-lint cache status)" =~ $cache_regex ]]
+          echo path=${BASH_REMATCH[1]} >> $GITHUB_OUTPUT
 
       - name: Setup golangci-lint cache
         uses: actions/cache@v4
