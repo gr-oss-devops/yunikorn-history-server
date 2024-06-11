@@ -23,7 +23,6 @@ var (
 	ykHost        string
 	ykPort        int
 	yhsServerAddr string
-	eventCounts   config.EventTypeCounts
 )
 
 func main() {
